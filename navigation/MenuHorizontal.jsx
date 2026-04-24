@@ -9,6 +9,8 @@ import ProfileScreen from "../screens/pages/ProfileScreen";
 import MealPlanScreen from "../screens/pages/MealPlanScreen";
 import { useFonts, Poppins_700Bold, Poppins_400Regular } from "@expo-google-fonts/poppins";
 import Messagerie from "../screens/pages/Messageries/Messagerie";
+import ListeDieteticiens from "../screens/pages/Dieteticiens/ListeDieteticiens";
+import FilDActualites from "../screens/pages/actualites/FilDActualites";
 
 
 const HomeStack = createBottomTabNavigator();
@@ -21,8 +23,8 @@ function CustomHomeBar({ state, descriptors, navigation }) {
     const tabConfig = {
         Home: { icon: <Ionicons name="home" size={26} />, label: "Accueil" },
         MealPlan: { icon: <Ionicons name="restaurant" size={26} />, label: "Plans" },
-        Messagerie: { icon: <Ionicons name="chatbubble" size={26} />, label: "Classes" },
-        Profile: { icon: <Ionicons name="person" size={26} />, label: "Profil" },
+        Messagerie: { icon: <Ionicons name="chatbubble" size={26} />, label: "Chats" },
+        Dieteticiens: { icon: <Ionicons name="planet" size={26} />, label: "Actu" },
     };
 
     return (
@@ -103,7 +105,7 @@ const MenuHorizontal = () => {
         >
 
             <HomeStack.Screen name="Home" component={HomeScreen} options={{ title: 'Isidiet' }} />
-            <HomeStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profil' }} />
+            <HomeStack.Screen name="Dieteticiens" component={FilDActualites} options={{ title: 'Actu' }} />
             <HomeStack.Screen name="MealPlan" component={MealPlanScreen} options={{ title: 'Plans Alimentaires' }} />
             <HomeStack.Screen name="Messagerie" component={Messagerie} options={{ title: 'Master Classes & Messagerie' }} />
             

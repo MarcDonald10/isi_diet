@@ -2,8 +2,13 @@
 
 buildscript {
   repositories {
+    maven {url 'https://www.jitpack.io'}
     google()
     mavenCentral()
+    maven {url 'https://repo1.maven.org/maven2'}
+    maven {
+      url "https://storage.googleapis.com/download.flutter.io"
+    }
   }
   dependencies {
     classpath('com.android.tools.build:gradle')

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Image, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { saveUser } from '../../services/localSotrage/UserConnectData';
+import { getDocumentById, signIn, signUp } from '../../services/firebase/firebaseService';
 
 const { width } = Dimensions.get('window');
 
@@ -10,13 +12,45 @@ const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    setLoading(true);
-    // Simule une connexion (remplace par ton vrai login)
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      console.log('🔐 Tentative de connexion avec :', email);
+
+      // Connexion Firebase (remplace "signIn" par ta fonction réelle)
+      const userNew = await signIn(email, password);
+
+      if (!userNew || !userNew.uid) {
+        throw new Error('Aucun utilisateur retourné après la connexion.');
+      }
+
+      console.log('✅ Utilisateur connecté :', userNew.uid);
+
+      // Récupération des données utilisateur
+      const userData = await getDocumentById('users', userNew.uid);
+
+      if (!userData) {
+        throw new Error('Données utilisateur introuvables dans Firestore.');
+      }
+
+      console.log('📄 Données utilisateur récupérées :', userData);
+
+      // Sauvegarde locale (AsyncStorage ou autre)
+      await saveUser(userData);
+      if (userData.type === "Patient") {
+        navigation.replace('Accueil');
+      } else {
+        navigation.replace('MenuDieteticien');
+      }
+      // Navigation vers l’accueil
+
+    } catch (error) {
+      console.error('❌ Erreur lors de la connexion :', error.message);
+      Alert.alert('Erreur de connexion', error.message || 'Une erreur est survenue.');
+    } finally {
       setLoading(false);
-      navigation.replace('Dashboard');
-    }, 1200);
+    }
   };
+
 
   return (
     <View style={styles.container}>

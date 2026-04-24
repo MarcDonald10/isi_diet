@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ClassesMessagingScreen({ navigation }) {
+  
   const classes = [
     { id: '1', title: 'Nutrition et diabète', dietitian: 'Dr. Dupont', format: 'Vidéo' },
     { id: '2', title: 'Alimentation équilibrée', dietitian: 'Dr. Martin', format: 'Webinaire' },

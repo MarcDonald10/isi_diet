@@ -1,34 +1,103 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Pour les icônes (notifications et chat)
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import { Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
+import { logOut } from '../../services/firebase/firebaseService';
+import { deleteUser } from '../../services/localSotrage/UserConnectData';
 
-const Header = ({ userPhoto, username, onChatPress, onNotificationPress, notificationCount }) => {
+const { width, height } = Dimensions.get('window');
+
+const Header = ({ pageName = 'Accueil', onNotificationPress, notificationCount }) => {
+     const navigation = useNavigation();
+  const { user, loading } = useAuth();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [slideAnim] = useState(new Animated.Value(-width * 0.7));
+
+  const toggleMenu = () => {
+    const toValue = menuVisible ? -width * 0.7 : 0;
+    Animated.spring(slideAnim, {
+      toValue,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 11
+    }).start();
+    setMenuVisible(!menuVisible);
+  };
+
+  const deconnextion = async() => {
+
+    await logOut();
+    await deleteUser();
+    navigation.navigate('Login');
+  }
+  const menuItems = [
+    { icon: 'person-outline', label: 'Mon Profil', onPress: () => user?.type === "Patient" ? navigation.navigate('Profile') : navigation.navigate('ProfilDieteticien',{dieticienId: user?.uid}) },
+    { icon: 'settings-outline', label: 'Paramètres', onPress: () => navigation.navigate('SettingPatient') },
+    { icon: 'log-out-outline', label: 'Déconnexion', onPress: () => deconnextion() },
+  ];
+
   return (
-    <View style={styles.header}>
-      {/* Photo de l'utilisateur et nom */}
-      <View style={styles.userContainer}>
-        <Image
-          source={userPhoto ? { uri: userPhoto } : ''} // Image par défaut si pas de photo
-          style={styles.userPhoto}
-        />
-        <Text style={styles.username}>{username || 'Utilisateur'}</Text>
+    <>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
+          <Ionicons name="menu-outline" size={28} color="#815F9C" />
+        </TouchableOpacity>
+
+        <Text style={styles.pageName}>{pageName}</Text>
+
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity onPress={onNotificationPress} style={styles.iconButton}>
+            <Ionicons name="notifications-outline" size={28} color="#333" />
+            {notificationCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationText}>{notificationCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Boutons de chat et notification */}
-      <View style={styles.actionsContainer}>
-        {/* <TouchableOpacity onPress={onChatPress} style={styles.iconButton}>
-          <Ionicons name="chatbubble-outline" size={28} color="#333" />
-        </TouchableOpacity> */}
-        <TouchableOpacity onPress={onNotificationPress} style={styles.iconButton}>
-          <Ionicons name="notifications-outline" size={28} color="#333" />
-          {notificationCount > 0 && (
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>{notificationCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-    </View>
+      {/* Menu latéral */}
+      {menuVisible && (
+        <TouchableOpacity 
+          style={styles.overlay} 
+          activeOpacity={1} 
+          onPress={toggleMenu}
+        />
+      )}
+      
+      <Animated.View 
+        style={[
+          styles.menu,
+          { transform: [{ translateX: slideAnim }] }
+        ]}
+      >
+        <View style={styles.menuHeader}>
+          <Image
+            source={user?.photo ? { uri: user.photo } : "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
+            style={styles.menuUserPhoto}
+          />
+          <Text style={styles.menuUsername}>{user?.prenom + ' ' + user?.nom || 'Utilisateur'}</Text>
+        </View>
+
+        <View style={styles.menuItems}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.menuItem}
+              onPress={() => {
+                toggleMenu();
+                item.onPress();
+              }}
+            >
+              <Ionicons name={item.icon} size={24} color="#815F9C" />
+              <Text style={styles.menuItemText}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </Animated.View>
+    </>
   );
 };
 
@@ -52,9 +121,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  menuButton: {
+    padding: 8,
+  },
+  pageName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#815F9C',
+    flex: 1,
+    textAlign: 'center',
+    letterSpacing: 0.2,
+  },
   userPhoto: {
-    width: 44,
-    height: 44,
+    width: 50,
+    height: 50,
     borderRadius: 22,
     marginRight: 12,
     borderWidth: 2,
@@ -96,6 +176,73 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 1,
+  },
+  menu: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '70%',
+    height: '100%',
+    backgroundColor: '#fff',
+    zIndex: 2,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 2,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  menuHeader: {
+    padding: 20,
+    backgroundColor: '#F6F0F5',
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EAE3EC',
+  },
+  menuUserPhoto: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 10,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  menuUsername: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#815F9C',
+    textAlign: 'center',
+  },
+  menuItems: {
+    padding: 15,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    marginBottom: 5,
+  },
+  menuItemText: {
+    marginLeft: 15,
+    fontSize: 16,
+    color: '#1E223D',
+    fontWeight: '500',
   },
 });
 

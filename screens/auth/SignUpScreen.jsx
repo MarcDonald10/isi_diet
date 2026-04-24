@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, Text, TextInput, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, Text, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { addDocument, addDocumentUsers, signUp } from '../../services/firebase/firebaseService';
+import { deleteUser, saveUser } from '../../services/localSotrage/UserConnectData';
 
 const { width } = Dimensions.get('window');
 
 const SignUpScreen = ({ navigation }) => {
-  const [userType, setUserType] = useState('patient');
+  const [userType, setUserType] = useState('Patient');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,12 +26,53 @@ const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
+    if (!email || !password || !firstName || !phone) {
+      alert('Veuillez remplir tous les champs requis.');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      // 1. Création du compte Firebase Auth
+      deleteUser()
+      const user = await signUp(email, password);
+
+      console.log('Utilisateur créé avec succès:', user.uid);
+      // return null
+      // 2. Création de l'objet à enregistrer dans Firestore
+      const userData = {
+        uid: user?.uid,              // UID sécurisé
+        type: userType,
+        email,
+        nom: firstName,
+        prenom: firstName,
+        phone,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // 3. Ajout dans Firestore
+      await addDocumentUsers(user?.uid, userData);
+
+      // 4. Sauvegarde locale (async storage ou contexte global)
+      await saveUser(userData);
+
+      // 5. Redirection 
+      if (userType === "Patient") {
+        navigation.replace('Accueil');
+      }
+      if (userType === "Diététicien") {
+        navigation.replace('MenuDieteticien');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'inscription :', error);
+      Alert("Une erreur s'est produite lors de l'inscription. Veuillez réessayer.");
+    } finally {
       setLoading(false);
-      navigation.replace('ProfileCreation');
-    }, 1200);
+    }
   };
+
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -50,12 +93,12 @@ const SignUpScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.radioButton,
-              userType === 'patient' && styles.radioButtonActive,
+              userType === 'Patient' && styles.radioButtonActive,
             ]}
-            onPress={() => setUserType('patient')}
+            onPress={() => setUserType('Patient')}
           >
             <Ionicons
-              name={userType === 'patient' ? 'radio-button-on' : 'radio-button-off'}
+              name={userType === 'Patient' ? 'radio-button-on' : 'radio-button-off'}
               size={20}
               color="#815F9C"
             />
@@ -64,12 +107,12 @@ const SignUpScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.radioButton,
-              userType === 'dietician' && styles.radioButtonActive,
+              userType === 'Diététicien' && styles.radioButtonActive,
             ]}
-            onPress={() => setUserType('dietician')}
+            onPress={() => setUserType('Diététicien')}
           >
             <Ionicons
-              name={userType === 'dietician' ? 'radio-button-on' : 'radio-button-off'}
+              name={userType === 'Diététicien' ? 'radio-button-on' : 'radio-button-off'}
               size={20}
               color="#815F9C"
             />

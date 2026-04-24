@@ -94,15 +94,15 @@ android {
         applicationId 'com.sprinterit.isidiet'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 4
         versionName "1.0.0"
     }
     signingConfigs {
         debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            storeFile file('isiDiet-key.jks')
+            storePassword 'BMD@2001Monique'
+            keyAlias 'isiDiet-alias'
+            keyPassword 'BMD@2001Monique'
         }
     }
     buildTypes {

@@ -1,10 +1,14 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { redirectToInterface } from '../../services/localSotrage/UserConnectData';
 
 const { width } = Dimensions.get('window');
 
-const Welcome = ({ navigation }) => (
+const Welcome = ({ navigation }) => {
+  
+  
+  return (
   <View style={styles.container}>
     <View style={styles.heroContainer}>
       <Image
@@ -13,7 +17,7 @@ const Welcome = ({ navigation }) => (
         resizeMode="cover"
       />
       <View style={styles.heroOverlay} />
-      
+
       <Ionicons
         name="accessibility-outline"
         size={35}
@@ -26,6 +30,16 @@ const Welcome = ({ navigation }) => (
       <Text style={styles.subtitle}>
         Votre suivi nutritionnel personnalisé, simple et moderne.
       </Text>
+
+      <TouchableOpacity
+        style={styles.secondaryButton }
+        onPress={() => navigation.navigate('Login')}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="log-in-outline" size={20} color="#815F9C" style={{ marginRight: 8 }} />
+        <Text style={styles.secondaryButtonText}>Se connecter</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.primaryButton}
         onPress={() => navigation.navigate('SignUp')}
@@ -34,17 +48,9 @@ const Welcome = ({ navigation }) => (
         <Ionicons name="person-add-outline" size={22} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.primaryButtonText}>S’inscrire</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.secondaryButton}
-        onPress={() => navigation.navigate('Login')}
-        activeOpacity={0.85}
-      >
-        <Ionicons name="log-in-outline" size={20} color="#815F9C" style={{ marginRight: 8 }} />
-        <Text style={styles.secondaryButtonText}>Se connecter</Text>
-      </TouchableOpacity>
     </View>
   </View>
-);
+)};
 
 const styles = StyleSheet.create({
   container: {
@@ -111,7 +117,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 60,
     borderRadius: 22,
-    marginBottom: 18,
+    margin: 10,
     shadowColor: '#815F9C',
     shadowOpacity: 0.16,
     shadowRadius: 10,
@@ -134,6 +140,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#815F9C',
     alignItems: 'center',
+    margin: 10,
   },
   secondaryButtonText: {
     color: '#815F9C',
