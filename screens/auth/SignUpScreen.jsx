@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, Text, TextInput, ActivityIndicator, Alert } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, Text, TextInput, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { addDocument, addDocumentUsers, signUp } from '../../services/firebase/firebaseService';
 import { deleteUser, saveUser } from '../../services/localSotrage/UserConnectData';
@@ -25,6 +25,11 @@ const SignUpScreen = ({ navigation }) => {
   const [specialty, setSpecialty] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const lastNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const phoneRef = useRef(null);
+  const passwordRef = useRef(null);
+
   const handleSignUp = async () => {
     if (!email || !password || !firstName || !phone) {
       alert('Veuillez remplir tous les champs requis.');
@@ -42,10 +47,10 @@ const SignUpScreen = ({ navigation }) => {
       // return null
       // 2. Création de l'objet à enregistrer dans Firestore
       const userData = {
-        uid: user?.uid,              // UID sécurisé
+        uid: user?.uid,
         type: userType,
         email,
-        nom: firstName,
+        nom: lastName,
         prenom: firstName,
         phone,
         createdAt: new Date().toISOString(),
@@ -67,7 +72,7 @@ const SignUpScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Erreur lors de l\'inscription :', error);
-      Alert("Une erreur s'est produite lors de l'inscription. Veuillez réessayer.");
+      Alert.alert('Inscription', "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -75,18 +80,26 @@ const SignUpScreen = ({ navigation }) => {
 
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
-      <View style={styles.header}>
-        <Image
-          source={require('../../assets/images/logo.png')}
-          style={styles.heroImage}
-        />
-        <View style={styles.heroOverlay} />
-        <Ionicons name="person-add-outline" size={25} color="#fff" style={styles.heroIcon} />
-      </View>
-      <View style={styles.form}>
-        <Text style={styles.title}>Créer un compte</Text>
-        <Text style={styles.subtitle}>Rejoignez ISI Diet et commencez votre suivi personnalisé.</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.heroImage}
+          />
+          <View style={styles.heroOverlay} />
+          <Ionicons name="person-add-outline" size={25} color="#fff" style={styles.heroIcon} />
+        </View>
+        <View style={styles.form}>
+          <Text style={styles.title}>Créer un compte</Text>
+          <Text style={styles.subtitle}>Rejoignez ISI Diet et commencez votre suivi personnalisé.</Text>
 
         <Text style={styles.label}>Type d'utilisateur</Text>
         <View style={styles.radioContainer}>
@@ -126,6 +139,9 @@ const SignUpScreen = ({ navigation }) => {
           onChangeText={setFirstName}
           style={styles.input}
           placeholderTextColor="#B9A9CC"
+          returnKeyType="next"
+          onSubmitEditing={() => lastNameRef.current?.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
           placeholder="Nom"
@@ -133,6 +149,10 @@ const SignUpScreen = ({ navigation }) => {
           onChangeText={setLastName}
           style={styles.input}
           placeholderTextColor="#B9A9CC"
+          ref={lastNameRef}
+          returnKeyType="next"
+          onSubmitEditing={() => emailRef.current?.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
           placeholder="Email"
@@ -142,6 +162,10 @@ const SignUpScreen = ({ navigation }) => {
           autoCapitalize="none"
           keyboardType="email-address"
           placeholderTextColor="#B9A9CC"
+          ref={emailRef}
+          returnKeyType="next"
+          onSubmitEditing={() => phoneRef.current?.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
           placeholder="Téléphone"
@@ -150,6 +174,10 @@ const SignUpScreen = ({ navigation }) => {
           style={styles.input}
           keyboardType="phone-pad"
           placeholderTextColor="#B9A9CC"
+          ref={phoneRef}
+          returnKeyType="next"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          blurOnSubmit={false}
         />
         <TextInput
           placeholder="Mot de passe"
@@ -158,6 +186,9 @@ const SignUpScreen = ({ navigation }) => {
           style={styles.input}
           secureTextEntry
           placeholderTextColor="#B9A9CC"
+          ref={passwordRef}
+          returnKeyType="done"
+          onSubmitEditing={handleSignUp}
         />
 
 
@@ -186,6 +217,7 @@ const SignUpScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -194,17 +226,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F6F0F5',
   },
+  scrollContent: {
+    paddingBottom: 32,
+  },
   header: {
     width: '100%',
-    height: width * 0.45,
+    height: width * 0.65,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
     marginBottom: 0,
+    marginTop: 10,
   },
   heroImage: {
-    width: '100%',
-    height: '100%',
+    width: '60%',
+    height: '60%',
     borderBottomLeftRadius: 48,
     borderBottomRightRadius: 48,
   },

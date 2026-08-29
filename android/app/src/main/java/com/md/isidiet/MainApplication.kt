@@ -1,4 +1,4 @@
-package com.sprinterit.isidiet
+package com.md.isidiet
 
 import android.app.Application
 import android.content.res.Configuration

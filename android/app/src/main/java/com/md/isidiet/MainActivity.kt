@@ -1,4 +1,4 @@
-package com.sprinterit.isidiet
+package com.md.isidiet
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

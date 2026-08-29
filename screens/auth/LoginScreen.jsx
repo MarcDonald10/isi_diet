@@ -129,15 +129,17 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    height: width * 0.55,
+    height: width * 0.65,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
     marginBottom: 0,
+    marginTop: 10,
+    
   },
   heroImage: {
-    width: '100%',
-    height: '100%',
+    width: '60%',
+    height: '60%',
     borderBottomLeftRadius: 48,
     borderBottomRightRadius: 48,
   },
