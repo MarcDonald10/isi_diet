@@ -12,6 +12,16 @@ buildscript {
   }
 }
 
+// Play Console requires apps to target API level 36 (Android 16) at minimum.
+// Expo SDK 53's default (compileSdk/targetSdk 35) is overridden here since
+// expo-root-project only sets these values if they aren't already set.
+ext {
+  buildToolsVersion = "36.0.0"
+  minSdkVersion = 24
+  compileSdkVersion = 36
+  targetSdkVersion = 36
+}
+
 def reactNativeAndroidDir = new File(
   providers.exec {
     workingDir(rootDir)
